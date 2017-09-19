@@ -8,9 +8,9 @@
 	<name>XTF</name>
 
 	<scm>
-		<connection>scm:git:git@github.com:xtf-cz/xtf.git</connection>
-		<developerConnection>scm:git:git@github.com:xtf-cz/xtf.git</developerConnection>
-		<url>http://github.com/xtf-cz/xtf.git</url>
+		<connection>scm:git:git@github.com:dsimansk/xtf.git</connection>
+		<developerConnection>scm:git:git@github.com:dsimansk/xtf.git</developerConnection>
+		<url>http://github.com/dsimansk/xtf.git</url>
 		<tag>${project.version}</tag>
 	</scm>
 
@@ -250,6 +250,12 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+			</plugin>
+
 
 		</plugins>
 	</build>
