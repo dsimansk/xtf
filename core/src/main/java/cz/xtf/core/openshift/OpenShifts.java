@@ -135,16 +135,19 @@ public class OpenShifts {
 			throw new IllegalStateException("Client binary for version " + version + " isn't available at " + clientLocation);
 		}
 
-		File workdir = new File(Paths.get("tmp/oc").toAbsolutePath().toString());
-		if (!workdir.mkdirs()) {
-			throw new IllegalStateException("Cannot mkdirs " + workdir);
-		}
-
-		// Download and extract client
-		File ocTarFile = new File(workdir, "oc.tar.gz");
-		File ocFile = new File(workdir, "oc");
-
 		try {
+			File workdir = new File(Paths.get("tmp/oc").toAbsolutePath().toString());
+			if (workdir.exists()) {
+				FileUtils.deleteDirectory(workdir);
+			}
+			if (!workdir.mkdirs()) {
+				throw new IllegalStateException("Cannot mkdirs " + workdir);
+			}
+
+			// Download and extract client
+			File ocTarFile = new File(workdir, "oc.tar.gz");
+			File ocFile = new File(workdir, "oc");
+
 			URL requestUrl = new URL(clientLocation + "oc.tar.gz");
 			FileUtils.copyURLToFile(requestUrl, ocTarFile, 20_000, 300_000);
 
