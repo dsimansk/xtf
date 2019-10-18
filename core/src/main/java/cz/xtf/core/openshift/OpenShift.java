@@ -15,12 +15,14 @@ import io.fabric8.kubernetes.api.model.HorizontalPodAutoscaler;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.ResourceQuota;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.rbac.Role;
@@ -63,6 +65,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -164,6 +167,25 @@ public class OpenShift extends DefaultOpenShiftClient {
 		super(openShiftConfig);
 
 		this.waiters = new OpenShiftWaiters(this);
+	}
+
+	public void setupPullSecret(String secret) {
+		setupPullSecret("xtf-pull-secret", secret);
+	}
+
+	public void setupPullSecret(String name, String secret) {
+		Secret pullSecret = new SecretBuilder()
+				.withNewMetadata()
+					.withNewName(name)
+					.addToLabels(KEEP_LABEL, "true")
+				.endMetadata()
+				.withNewType("kubernetes.io/dockerconfigjson")
+				.withData(Collections.singletonMap(".dockerconfigjson", Base64.getEncoder().encodeToString(secret.getBytes())))
+				.build();
+		secrets().createOrReplace(pullSecret);
+		serviceAccounts().withName("default").edit().addToSecrets(new ObjectReferenceBuilder().withName(pullSecret.getMetadata().getName()).build()).done();
+		serviceAccounts().withName("builder").edit().addToSecrets(new ObjectReferenceBuilder().withName(pullSecret.getMetadata().getName()).build()).done();
+		serviceAccounts().withName("deployer").edit().addToSecrets(new ObjectReferenceBuilder().withName(pullSecret.getMetadata().getName()).build()).done();
 	}
 
 	// General functions
